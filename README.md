@@ -3,7 +3,7 @@
 Track **software subscription** rows (cost, cycle, renewal date) in a small React + TypeScript SPA. Data is **in-memory in the browser** (demo rows optional); swap the store for an API when you add a backend.
 
 - **Notion (footer link):** set `VITE_NOTION_URL` in `.env` to your public Notion page or product hub (see [`.env.example`](.env.example)). Open Graph metadata in `index.html` is tuned so **your deployed app URL** unfurls when pasted into Notion or chat (update `og:url` if the domain changes).
-- **Live site:** intended URL [https://kissmeh02.github.io/software-subscription-tracker/](https://kissmeh02.github.io/software-subscription-tracker/). **Private repos on a Free plan** do not serve a public `github.io` copy (you will get **404**), even though the [Deploy to GitHub Pages](.github/workflows/pages.yml) workflow can still build. For a public URL on Free, the repository must be **public** or you must use **Pro**-eligible private Pages or an external host (Vercel, GCS+CDN, etc.). See [docs/GITHUB-SETUP.md](docs/GITHUB-SETUP.md).
+- **Live site:** [https://kissmeh02.github.io/software-subscription-tracker/](https://kissmeh02.github.io/software-subscription-tracker/) (GitHub **public** repo + [Deploy to GitHub Pages](.github/workflows/pages.yml)). If you set the repository **private** again, the public `github.io` URL on a Free plan may 404; see [docs/GITHUB-SETUP.md](docs/GITHUB-SETUP.md).
 
 ## Directory layout
 
@@ -38,11 +38,11 @@ Track **software subscription** rows (cost, cycle, renewal date) in a small Reac
 | `npm run test:run` | Vitest (CI once)        |
 | `npm run lint`   | ESLint                     |
 
-## GitHub (private) & Pages
+## GitHub & Pages
 
-- **This repository is set to private** with Issues, Discussions, auto-merge, and delete branch on merge enabled; the Wiki is off.
-- **Free + private** limitations: public **github.io** embed 404, and the **Branch protection** REST API can require a **paid** plan. Details and the exact `gh` commands: [docs/GITHUB-SETUP.md](docs/GITHUB-SETUP.md).
-- **Build:** `pages.yml` sets `VITE_BASE_PATH=/<repo-name>/` for asset paths.
+- **This repository is public** with Issues, Discussions, auto-merge, and delete branch on merge enabled; the Wiki is off.
+- **Branch `main`:** required status check **`build-and-test`** (from [CI](.github/workflows/ci.yml)); no force-pushes or branch deletion. Admins are not required to use these rules (GitHub *Include administrators* off).
+- **Build:** `pages.yml` sets `VITE_BASE_PATH=/<repo-name>/` for asset paths. For private-repo / paid-plan gotchas, see [docs/GITHUB-SETUP.md](docs/GITHUB-SETUP.md).
 
 ## Audits
 

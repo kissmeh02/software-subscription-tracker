@@ -8,10 +8,10 @@ The repository `POST /repos/.../pages` call with `build_type: workflow` was used
 gh api repos/OWNER/REPO/pages -X POST -f build_type=workflow
 ```
 
-## Private repository limits (Free plan)
+## Public vs private (Free plan)
 
-- **Private repo + public `github.io` site:** A **private** repository on a **Free** plan does not publish a world-readable GitHub Pages site. Expect **HTTP 404** on the Pages URL. Options: use a **public** repository for a free public site, **GitHub Pro** (or org plan) for **private** GitHub Pages, or host `dist/` on Vercel, Netlify, or Google Cloud **Storage** + **Cloud CDN** with the repo still private.
-- **Branch protection rules** on private repos may require a **paid** plan; the API can return *Upgrade to GitHub Pro or make this repository public*. When the plan allows, apply protection with the GitHub UI or `gh api` (see example below).
+- **Public repository:** Serves a world-readable **github.io** site and allows **branch protection** via the API on the Free plan (this project is configured that way while the repo stays public).
+- **Private repo + public `github.io` site:** On a **Free** plan, a **private** repo usually does **not** publish a public Pages URL (often **HTTP 404**). Options: go **public** for free Pages, use **Pro**-eligible private Pages, or host `dist/` on Vercel, Netlify, or GCS+CDN. Branch protection for **private** repos can require a **paid** plan from the API.
 
 ## Example branch protection (when the API allows it)
 
