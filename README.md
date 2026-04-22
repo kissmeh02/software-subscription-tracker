@@ -1,29 +1,21 @@
 # Software Subscription Tracker
 
-Track **software subscription** rows (cost, cycle, renewal date) in a small React + TypeScript SPA. Data is **in-memory in the browser** (demo rows optional); swap the store for an API when you add a backend.
+Single-page app in the root [index.html](index.html): **DM Sans** / **DM Mono**, work vs personal categories, CAD/USD toggle, metrics, **Chart.js** spend trend, filters, `localStorage` persistence (`subtrkr-v2`), CSV export, and Notion-style renewal reminders. A tiny [src/main.ts](src/main.ts) is only the Vite build entry; all UI and behavior are inline in `index.html`.
 
-- **Notion (footer link):** set `VITE_NOTION_URL` in `.env` to your public Notion page or product hub (see [`.env.example`](.env.example)). Open Graph metadata in `index.html` is tuned so **your deployed app URL** unfurls when pasted into Notion or chat (update `og:url` if the domain changes).
+- **Open Graph** meta tags in `index.html` help when you paste the **deployed** site URL in Notion; update `og:url` if the domain changes.
 - **Live site:** [https://kissmeh02.github.io/software-subscription-tracker/](https://kissmeh02.github.io/software-subscription-tracker/) (GitHub **public** repo + [Deploy to GitHub Pages](.github/workflows/pages.yml)). If you set the repository **private** again, the public `github.io` URL on a Free plan may 404; see [docs/GITHUB-SETUP.md](docs/GITHUB-SETUP.md).
 
 ## Directory layout
 
 ```text
 .
-├── .github/
-│   └── workflows/
-│       ├── ci.yml              # test + lint + build
-│       └── pages.yml            # static deploy to GitHub Pages
-├── docs/
-│   ├── CODE-AUDIT.md          # structure, SOLID mapping, test notes
-│   ├── RECOMMENDATIONS.md     # optional product / tech improvements
-│   └── SECURITY.md            # cloud & secrets (detailed)
-├── public/                     # static assets (favicon, etc.)
+├── .github/workflows/   # ci.yml, pages.yml
+├── docs/                # security, setup notes, audit
+├── public/              # favicon (copied to dist root)
 ├── src/
-│   ├── app/                    # shell, layout, styles, main entry
-│   ├── features/subscriptions/ # domain: model, services, hooks, components
-│   ├── lib/                    # small shared utilities
-│   └── test/                   # vitest global setup
-├── index.html
+│   ├── main.ts         # Vite entry (no UI logic)
+│   └── smoke.test.ts
+├── index.html          # full app: styles, layout, and script
 ├── vite.config.ts
 └── package.json
 ```
