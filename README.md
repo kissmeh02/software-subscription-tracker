@@ -1,28 +1,56 @@
 # Software Subscription Tracker
 
-## GitHub
+Track **software subscription** rows (cost, cycle, renewal date) in a small React + TypeScript SPA. Data is **in-memory in the browser** (demo rows optional); swap the store for an API when you add a backend.
 
-This folder is a Git repository. To publish it to GitHub:
+- **Notion (footer link):** set `VITE_NOTION_URL` in `.env` to your public Notion page or product hub (see [`.env.example`](.env.example)). Open Graph metadata in `index.html` is tuned so **your deployed app URL** unfurls when pasted into Notion or chat (update `og:url` if the domain changes).
+- **Live site (after deploy):** [GitHub Pages](https://kissmeh02.github.io/software-subscription-tracker/) — requires Pages to be enabled and a successful [Deploy to GitHub Pages](.github/workflows/pages.yml) run.
 
-**Repository:** [github.com/kissmeh02/software-subscription-tracker](https://github.com/kissmeh02/software-subscription-tracker)
+## Directory layout
 
-To push later updates:
-
-```bash
-cd "d:\Repository\Software Subscription Tracker"
-git add -A
-git commit -m "Your message"
-git push
+```text
+.
+├── .github/
+│   └── workflows/
+│       ├── ci.yml              # test + lint + build
+│       └── pages.yml            # static deploy to GitHub Pages
+├── docs/
+│   ├── CODE-AUDIT.md          # structure, SOLID mapping, test notes
+│   ├── RECOMMENDATIONS.md     # optional product / tech improvements
+│   └── SECURITY.md            # cloud & secrets (detailed)
+├── public/                     # static assets (favicon, etc.)
+├── src/
+│   ├── app/                    # shell, layout, styles, main entry
+│   ├── features/subscriptions/ # domain: model, services, hooks, components
+│   ├── lib/                    # small shared utilities
+│   └── test/                   # vitest global setup
+├── index.html
+├── vite.config.ts
+└── package.json
 ```
 
-## Using this project in Notion
+## Scripts
 
-Notion does not run your app by itself, but you can connect your workflow in a few ways:
+| Command          | Description                |
+| ---------------- | -------------------------- |
+| `npm run dev`    | Vite dev server (localhost) |
+| `npm run build`  | TypeScript + Vite build    |
+| `npm run test`   | Vitest (watch)             |
+| `npm run test:run` | Vitest (CI once)        |
+| `npm run lint`   | ESLint                     |
 
-| What you want | How |
-|---------------|-----|
-| **Link the repo in a Notion page** | Paste the GitHub URL; Notion shows a link preview. |
-| **Track the repo in Notion** | In Notion, use **Settings → Connections → GitHub** to connect your account, then you can add GitHub blocks or database properties that point at repos. |
-| **Build a Notion “database” of subscriptions** | Use the [Notion API](https://developers.notion.com/) from your app: create a Notion integration, share a database with it, and sync rows from this tracker (requires coding against the API and storing `NOTION_TOKEN` only in local env, never in git). |
+## GitHub (private) & Pages
 
-Add your app code to this folder, commit, and push so GitHub always reflects your project.
+- **Source:** this repo is intended to be **private**; use GitHub to manage Issues and Discussions.
+- **Private repo + free GitHub plan:** *Private* GitHub Pages may require a **paid** plan; if the Pages workflow is blocked, use a public fork for Pages or upgrade—see [GitHub Pages docs](https://docs.github.com/pages/getting-started-with-github-pages/about-github-pages).
+- **Deployment:** `pages.yml` builds with `VITE_BASE_PATH=/<repo-name>/` so assets resolve under the project path.
+
+## Audits
+
+- [Code & architecture](docs/CODE-AUDIT.md) — modularity, SOLID mapping, tests.
+- [Security (deployment-oriented)](docs/SECURITY.md) — env, Vite, future API/DB, GCP Secret Manager, headers.
+- [Recommendations](docs/RECOMMENDATIONS.md) — product and engineering improvements.
+- [Vulnerability reporting](SECURITY.md)
+
+## License
+
+[MIT](LICENSE)
