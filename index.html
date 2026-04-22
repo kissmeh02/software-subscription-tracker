@@ -27,6 +27,9 @@
           <button type="button" class="currency-btn" data-currency="USD">USD</button>
         </div>
         <button type="button" class="btn btn-sm" data-action="export-csv">↓ Export CSV</button>
+        <button type="button" class="btn btn-sm" data-action="export-backup" title="Download full data as JSON">↓ JSON</button>
+        <button type="button" class="btn btn-sm" data-action="import-backup" title="Restore from a JSON backup (replaces all data)">↑ Restore</button>
+        <input type="file" id="import-backup" accept="application/json,.json" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none" tabindex="-1" aria-hidden="true" />
         <button type="button" class="btn btn-sm" data-action="reminders">🔔 Reminders</button>
         <button type="button" class="btn btn-accent" data-action="add-subscription">+ Add</button>
       </div>
@@ -73,7 +76,8 @@
         <option value="name">Sort: Name</option>
         <option value="cost-desc">Sort: Cost ↓</option>
         <option value="cost-asc">Sort: Cost ↑</option>
-        <option value="renewal">Sort: Renewal</option>
+        <option value="renewal">Sort: Renewal (date)</option>
+        <option value="next-charge" title="Active first, then order by next renewal (soonest first)">Sort: Next charge</option>
       </select>
     </div>
 

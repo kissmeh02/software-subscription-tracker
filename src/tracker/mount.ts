@@ -1,9 +1,10 @@
 import { appState } from './app-state.js'
+import { downloadBackup, normalizeSubscriptionIds, parseBackupJson } from './backup.js'
 import { queryElement, requireElement } from './dom.js'
 import { downloadSubscriptionsCsv } from './csv-export.js'
 import { renderDashboard } from './render/index.js'
 import { renderTrendChart } from './render/trend-chart.js'
-import { loadSubscriptions } from './storage.js'
+import { loadSubscriptions, saveSubscriptions } from './storage.js'
 import { deleteSubscription, togglePause } from './subscription-actions.js'
 import {
   copyAllReminders,
@@ -75,6 +76,42 @@ export function mountApp(): void {
   })
 
   queryElement<HTMLButtonElement>('[data-action="export-csv"]').addEventListener('click', downloadSubscriptionsCsv)
+  queryElement<HTMLButtonElement>('[data-action="export-backup"]').addEventListener('click', () => {
+    downloadBackup(appState.subs)
+  })
+  const importInput = requireElement<HTMLInputElement>('import-backup')
+  queryElement<HTMLButtonElement>('[data-action="import-backup"]').addEventListener('click', () => {
+    importInput.click()
+  })
+  importInput.addEventListener('change', (ev) => {
+    const input = ev.target as HTMLInputElement
+    const file = input.files?.[0]
+    input.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const text = String(reader.result ?? '')
+      const res = parseBackupJson(text)
+      if (!res.ok) {
+        globalThis.alert?.(res.error)
+        return
+      }
+      if (
+        !globalThis.confirm?.(
+          'Replace all subscriptions on this device with the backup? This cannot be undone.',
+        )
+      ) {
+        return
+      }
+      appState.subs = normalizeSubscriptionIds(res.subscriptions)
+      saveSubscriptions()
+      renderDashboard()
+    }
+    reader.onerror = () => {
+      globalThis.alert?.('Could not read that file.')
+    }
+    reader.readAsText(file, 'utf-8')
+  })
   queryElement<HTMLButtonElement>('[data-action="reminders"]').addEventListener('click', openRemindersModal)
   queryElement<HTMLButtonElement>('[data-action="add-subscription"]').addEventListener('click', () => {
     openSubscriptionModal(null)

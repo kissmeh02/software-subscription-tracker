@@ -1,7 +1,7 @@
 import { appState } from '../app-state.js'
 import { requireElement } from '../dom.js'
 import { escapeHtml } from '../escape-html.js'
-import { formatMoney, toMonthly, daysUntil } from '../format.js'
+import { formatMoney, toMonthly, daysUntil, compareSubscriptionsByNextCharge } from '../format.js'
 import type { Category, Currency, Status, Subscription } from '../types.js'
 
 function subCardRow(s: Subscription, currency: Currency): string {
@@ -69,6 +69,7 @@ export function renderSubscriptionList(): void {
     if (sortBy === 'cost-desc') return toMonthly(b.cost, b.cycle) - toMonthly(a.cost, a.cycle)
     if (sortBy === 'cost-asc') return toMonthly(a.cost, a.cycle) - toMonthly(b.cost, b.cycle)
     if (sortBy === 'renewal') return (a.renewal || '9999') > (b.renewal || '9999') ? 1 : -1
+    if (sortBy === 'next-charge') return compareSubscriptionsByNextCharge(a, b)
     return a.name.localeCompare(b.name)
   })
 

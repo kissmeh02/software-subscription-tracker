@@ -10,16 +10,20 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:e2e": "cross-env VITE_BASE_PATH= vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "chart.js": "^4.4.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "cross-env": "^7.0.3",
     "@eslint/js": "^9.39.4",
     "@types/node": "^24.12.2",
     "eslint": "^9.39.4",
