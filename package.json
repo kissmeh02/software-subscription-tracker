@@ -16,6 +16,9 @@
     "test": "vitest",
     "test:run": "vitest run"
   },
+  "dependencies": {
+    "chart.js": "^4.4.1"
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@types/node": "^24.12.2",

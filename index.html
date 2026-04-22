@@ -1,692 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Subscription Tracker</title>
-<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-<meta name="description" content="Personal and business software spend — subscription tracker" />
-<meta property="og:title" content="Subscription Tracker" />
-<meta property="og:description" content="Personal and business software spend" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="https://kissmeh02.github.io/software-subscription-tracker/" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --surface2: #f0efe9;
-    --border: rgba(0,0,0,0.08);
-    --border-strong: rgba(0,0,0,0.14);
-    --text: #1a1916;
-    --text2: #6b6a65;
-    --text3: #9e9d97;
-    --accent: #00e5ff;
-    --accent-dim: rgba(0,229,255,0.12);
-    --accent-text: #006b78;
-    --work-bg: #e8f4fd; --work-text: #1565a0;
-    --personal-bg: #e8f6ee; --personal-text: #1b5e3b;
-    --warn-bg: #fef3e2; --warn-text: #8a4a00;
-    --danger-bg: #fde8e8; --danger-text: #8a1f1f;
-    --success-bg: #e8f6ee; --success-text: #1b5e3b;
-    --pause-bg: #f0edfb; --pause-text: #4a2e8a;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #141412;
-      --surface: #1e1d1a;
-      --surface2: #272622;
-      --border: rgba(255,255,255,0.07);
-      --border-strong: rgba(255,255,255,0.12);
-      --text: #f0ede6;
-      --text2: #a09e97;
-      --text3: #6e6c66;
-      --accent: #00e5ff;
-      --accent-dim: rgba(0,229,255,0.1);
-      --accent-text: #00c4db;
-      --work-bg: #0d2035; --work-text: #7abfed;
-      --personal-bg: #0d2218; --personal-text: #6dbe8d;
-      --warn-bg: #2a1e08; --warn-text: #f0a832;
-      --danger-bg: #2a0d0d; --danger-text: #e87272;
-      --success-bg: #0d2218; --success-text: #6dbe8d;
-      --pause-bg: #1c1235; --pause-text: #b090f0;
-    }
-  }
-
-  html { font-size: 15px; }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  /* ─── Layout ─── */
-  .app { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
-
-  /* ─── Header ─── */
-  .header { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
-  .header-left h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; color: var(--text); }
-  .header-left p { font-size: 0.8rem; color: var(--text3); margin-top: 2px; }
-  .header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-  /* ─── Buttons ─── */
-  .btn { font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500; padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text2); cursor: pointer; transition: all 0.15s; white-space: nowrap; }
-  .btn:hover { background: var(--surface2); color: var(--text); }
-  .btn-primary { background: var(--text); color: var(--bg); border-color: transparent; }
-  .btn-primary:hover { opacity: 0.85; background: var(--text); }
-  .btn-accent { background: var(--accent); color: #003840; border-color: transparent; font-weight: 600; }
-  .btn-accent:hover { opacity: 0.9; }
-  .btn-sm { padding: 5px 10px; font-size: 0.75rem; }
-  .btn-icon { padding: 6px 8px; font-size: 0.85rem; line-height: 1; }
-
-  /* ─── Metrics ─── */
-  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.75rem; }
-  .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; }
-  .metric-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
-  .metric-value { font-size: 1.45rem; font-weight: 600; color: var(--text); font-family: 'DM Mono', monospace; letter-spacing: -0.02em; }
-  .metric-sub { font-size: 0.72rem; color: var(--text3); margin-top: 3px; }
-  .metric-warn .metric-value { color: var(--warn-text); }
-
-  /* ─── Charts ─── */
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.75rem; }
-  @media (max-width: 600px) { .charts-row { grid-template-columns: 1fr; } }
-  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; }
-  .chart-card-title { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
-  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .bar-label { font-size: 0.75rem; color: var(--text2); width: 88px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
-  .bar-val { font-size: 0.75rem; font-family: 'DM Mono', monospace; color: var(--text); min-width: 52px; text-align: right; }
-  .renewal-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); }
-  .renewal-row:last-child { border-bottom: none; }
-  .renewal-name { font-size: 0.8rem; color: var(--text); display: flex; align-items: center; gap: 6px; }
-  .renewal-days { font-size: 0.72rem; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
-  .days-urgent { background: var(--warn-bg); color: var(--warn-text); }
-  .days-ok { background: var(--success-bg); color: var(--success-text); }
-
-  /* ─── Toolbar ─── */
-  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
-  .search-wrap { flex: 1; min-width: 180px; position: relative; }
-  .search-wrap input { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 0.82rem; padding: 7px 10px 7px 32px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); }
-  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 0.85rem; pointer-events: none; }
-  .toolbar select { font-family: 'DM Sans', sans-serif; font-size: 0.82rem; padding: 7px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); cursor: pointer; }
-
-  /* ─── Section label ─── */
-  .section-label { font-size: 0.7rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; padding: 0.75rem 0 0.4rem; }
-
-  /* ─── Sub cards ─── */
-  .sub-list { display: flex; flex-direction: column; gap: 5px; }
-  .sub-card { display: grid; grid-template-columns: 40px 1fr auto auto; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; transition: border-color 0.15s, box-shadow 0.15s; }
-  .sub-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
-  .sub-card.status-paused { opacity: 0.55; }
-  .sub-card.status-cancelled { opacity: 0.35; }
-  .sub-icon { width: 38px; height: 38px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-  .sub-name { font-size: 0.88rem; font-weight: 500; color: var(--text); }
-  .sub-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 3px; }
-  .badge { font-size: 0.68rem; font-weight: 500; padding: 2px 7px; border-radius: 20px; }
-  .badge-work { background: var(--work-bg); color: var(--work-text); }
-  .badge-personal { background: var(--personal-bg); color: var(--personal-text); }
-  .badge-active { background: var(--success-bg); color: var(--success-text); }
-  .badge-paused { background: var(--pause-bg); color: var(--pause-text); }
-  .badge-cancelled { background: var(--danger-bg); color: var(--danger-text); }
-  .badge-date { font-size: 0.68rem; color: var(--text3); }
-  .badge-soon { background: var(--warn-bg); color: var(--warn-text); font-size: 0.68rem; font-weight: 500; padding: 2px 7px; border-radius: 20px; }
-  .sub-cost { text-align: right; }
-  .sub-cost-main { font-size: 0.9rem; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text); }
-  .sub-cost-cycle { font-size: 0.68rem; color: var(--text3); margin-top: 1px; }
-  .sub-actions { display: flex; gap: 4px; }
-  .icon-btn { width: 28px; height: 28px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: transparent; cursor: pointer; font-size: 0.8rem; color: var(--text2); display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
-  .icon-btn:hover { background: var(--surface2); border-color: var(--border-strong); color: var(--text); }
-  .icon-btn.danger:hover { background: var(--danger-bg); color: var(--danger-text); border-color: transparent; }
-  .empty { text-align: center; padding: 3.5rem 1rem; color: var(--text3); font-size: 0.85rem; }
-
-  /* ─── Modal ─── */
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; }
-  .modal { background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 440px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
-  .modal-title { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 1.25rem; }
-  .form-row { margin-bottom: 13px; }
-  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 13px; }
-  .form-label { font-size: 0.72rem; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 5px; }
-  .form-input { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--bg); color: var(--text); transition: border-color 0.12s; }
-  .form-input:focus { outline: none; border-color: var(--accent); }
-  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-
-  /* ─── Trend chart ─── */
-  .trend-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem; margin-bottom: 1.75rem; }
-  .trend-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-  .trend-header-title { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; }
-  .chart-wrap { position: relative; height: 160px; }
-
-  /* ─── Currency toggle ─── */
-  .currency-toggle { display: flex; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); overflow: hidden; }
-  .currency-btn { font-family: 'DM Sans', sans-serif; font-size: 0.75rem; font-weight: 500; padding: 5px 10px; border: none; background: transparent; color: var(--text2); cursor: pointer; transition: all 0.12s; }
-  .currency-btn.active { background: var(--text); color: var(--bg); }
-
-  /* ─── Reminder modal ─── */
-  .reminder-list { display: flex; flex-direction: column; gap: 8px; max-height: 300px; overflow-y: auto; }
-  .reminder-item { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 0.8rem; color: var(--text2); font-family: 'DM Mono', monospace; line-height: 1.6; white-space: pre-wrap; }
-  .copy-all-btn { margin-top: 10px; width: 100%; }
-
-  /* ─── Tabs ─── */
-  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
-  .tab { font-size: 0.8rem; font-weight: 500; padding: 8px 14px; border: none; background: transparent; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.12s; }
-  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
-  .tab:hover { color: var(--text2); }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ─── Scrollbar ─── */
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subscription Tracker</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <meta name="description" content="Personal and business software spend — subscription tracker" />
+  <meta property="og:title" content="Subscription Tracker" />
+  <meta property="og:description" content="Personal and business software spend" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://kissmeh02.github.io/software-subscription-tracker/" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script type="module" src="/src/main.ts"></script>
 </head>
 <body>
-
-<div class="app">
-  <div class="header">
-    <div class="header-left">
-      <h1>Subscription Tracker</h1>
-      <p>Personal &amp; business software spend</p>
-    </div>
-    <div class="header-actions">
-      <div class="currency-toggle">
-        <button class="currency-btn active" onclick="setCurrency('CAD')">CAD</button>
-        <button class="currency-btn" onclick="setCurrency('USD')">USD</button>
+  <div class="app">
+    <div class="header">
+      <div class="header-left">
+        <h1>Subscription Tracker</h1>
+        <p>Personal &amp; business software spend</p>
       </div>
-      <button class="btn btn-sm" onclick="exportCSV()">↓ Export CSV</button>
-      <button class="btn btn-sm" onclick="showReminders()">🔔 Reminders</button>
-      <button class="btn btn-accent" onclick="openModal()">+ Add</button>
+      <div class="header-actions">
+        <div class="currency-toggle">
+          <button type="button" class="currency-btn active" data-currency="CAD">CAD</button>
+          <button type="button" class="currency-btn" data-currency="USD">USD</button>
+        </div>
+        <button type="button" class="btn btn-sm" data-action="export-csv">↓ Export CSV</button>
+        <button type="button" class="btn btn-sm" data-action="reminders">🔔 Reminders</button>
+        <button type="button" class="btn btn-accent" data-action="add-subscription">+ Add</button>
+      </div>
     </div>
+
+    <div class="metrics" id="metrics"></div>
+
+    <div class="tabs">
+      <button type="button" class="tab active" data-tab="overview">Overview</button>
+      <button type="button" class="tab" data-tab="trend">Spend trend</button>
+    </div>
+
+    <div id="tab-overview" class="tab-panel active">
+      <div class="charts-row" id="charts"></div>
+    </div>
+    <div id="tab-trend" class="tab-panel">
+      <div class="trend-card">
+        <div class="trend-header">
+          <div class="trend-header-title">Monthly spend over time (projected 12 months)</div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="trendChart" role="img" aria-label="Monthly spend trend chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="search" id="search" placeholder="Search subscriptions…" autocomplete="off" />
+      </div>
+      <select id="filterCat">
+        <option value="">All categories</option>
+        <option value="work">Work</option>
+        <option value="personal">Personal</option>
+      </select>
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option value="active">Active</option>
+        <option value="paused">Paused</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <select id="sortBy">
+        <option value="name">Sort: Name</option>
+        <option value="cost-desc">Sort: Cost ↓</option>
+        <option value="cost-asc">Sort: Cost ↑</option>
+        <option value="renewal">Sort: Renewal</option>
+      </select>
+    </div>
+
+    <div id="list"></div>
   </div>
 
-  <!-- Metrics -->
-  <div class="metrics" id="metrics"></div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('overview')">Overview</button>
-    <button class="tab" onclick="switchTab('trend')">Spend trend</button>
-  </div>
-
-  <div id="tab-overview" class="tab-panel active">
-    <div class="charts-row" id="charts"></div>
-  </div>
-  <div id="tab-trend" class="tab-panel">
-    <div class="trend-card">
-      <div class="trend-header">
-        <div class="trend-header-title">Monthly spend over time (projected 12 months)</div>
+  <div class="modal-backdrop" id="modal" style="display:none" role="presentation">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-title" id="modal-title">Add subscription</div>
+      <div class="form-row">
+        <label class="form-label" for="f-name">Name</label>
+        <input class="form-input" id="f-name" placeholder="e.g. Figma, Slack, Netflix" />
       </div>
-      <div class="chart-wrap">
-        <canvas id="trendChart" role="img" aria-label="Monthly spend trend chart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <div class="search-wrap">
-      <span class="search-icon">⌕</span>
-      <input type="text" id="search" placeholder="Search subscriptions…" oninput="render()">
-    </div>
-    <select id="filterCat" onchange="render()">
-      <option value="">All categories</option>
-      <option value="work">Work</option>
-      <option value="personal">Personal</option>
-    </select>
-    <select id="filterStatus" onchange="render()">
-      <option value="">All statuses</option>
-      <option value="active">Active</option>
-      <option value="paused">Paused</option>
-      <option value="cancelled">Cancelled</option>
-    </select>
-    <select id="sortBy" onchange="render()">
-      <option value="name">Sort: Name</option>
-      <option value="cost-desc">Sort: Cost ↓</option>
-      <option value="cost-asc">Sort: Cost ↑</option>
-      <option value="renewal">Sort: Renewal</option>
-    </select>
-  </div>
-
-  <!-- List -->
-  <div id="list"></div>
-</div>
-
-<!-- Add/Edit Modal -->
-<div class="modal-backdrop" id="modal" style="display:none">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-title" id="modal-title">Add subscription</div>
-    <div class="form-row">
-      <label class="form-label">Name</label>
-      <input class="form-input" id="f-name" placeholder="e.g. Figma, Slack, Netflix">
-    </div>
-    <div class="form-row-2">
-      <div>
-        <label class="form-label">Cost</label>
-        <input class="form-input" id="f-cost" type="number" min="0" step="0.01" placeholder="12.99">
-      </div>
-      <div>
-        <label class="form-label">Billing cycle</label>
-        <select class="form-input" id="f-cycle">
-          <option value="monthly">Monthly</option>
-          <option value="annual">Annual</option>
-          <option value="weekly">Weekly</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row-2">
-      <div>
-        <label class="form-label">Category</label>
-        <select class="form-input" id="f-cat">
-          <option value="work">Work</option>
-          <option value="personal">Personal</option>
-        </select>
-      </div>
-      <div>
-        <label class="form-label">Status</label>
-        <select class="form-input" id="f-status">
-          <option value="active">Active</option>
-          <option value="paused">Paused</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <label class="form-label">Renewal date</label>
-      <input class="form-input" id="f-renewal" type="date">
-    </div>
-    <div class="form-row-2">
-      <div>
-        <label class="form-label">Icon / emoji</label>
-        <input class="form-input" id="f-icon" placeholder="🎨" maxlength="4">
-      </div>
-      <div>
-        <label class="form-label">Notes</label>
-        <input class="form-input" id="f-notes" placeholder="e.g. Team plan, 5 seats">
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" onclick="closeModal()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveModal()">Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- Reminder Modal -->
-<div class="modal-backdrop" id="reminder-modal" style="display:none">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-title">Renewal reminders</div>
-    <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem;">Copy any reminder text to paste into your calendar or Notion database.</p>
-    <div class="reminder-list" id="reminder-list"></div>
-    <button class="btn btn-primary copy-all-btn" onclick="copyAllReminders()">Copy all reminders</button>
-    <div class="modal-footer" style="padding-top:0.75rem;margin-top:0.5rem;">
-      <button class="btn" onclick="document.getElementById('reminder-modal').style.display='none'">Close</button>
-    </div>
-  </div>
-</div>
-
-<script>
-const STORAGE_KEY = 'subtrkr-v2';
-const CAD_USD = 0.73;
-const ICONS = ['📦','🛠','📊','🎬','🎵','💬','📧','🔐','🖥','🎨','📝','🔧','📱','🌐','🤖','📷'];
-
-let subs = [];
-let currency = 'CAD';
-let editId = null;
-let trendChart = null;
-
-// ─── Persistence ───
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { subs = JSON.parse(raw); return; }
-  } catch(e) {}
-  subs = defaultData();
-}
-function saveData() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(subs)); } catch(e) {}
-}
-
-// ─── Default data ───
-function defaultData() {
-  const d = (n) => { const dt = new Date(); dt.setDate(dt.getDate()+n); return dt.toISOString().split('T')[0]; };
-  return [
-    { id:1, name:'Figma', cost:15, cycle:'monthly', cat:'work', status:'active', renewal:d(5), icon:'🎨', notes:'Design team' },
-    { id:2, name:'Slack', cost:7.25, cycle:'monthly', cat:'work', status:'active', renewal:d(14), icon:'💬', notes:'' },
-    { id:3, name:'GitHub', cost:4, cycle:'monthly', cat:'work', status:'active', renewal:d(22), icon:'🐙', notes:'Pro plan' },
-    { id:4, name:'1Password', cost:2.99, cycle:'monthly', cat:'work', status:'active', renewal:d(8), icon:'🔐', notes:'' },
-    { id:5, name:'Netflix', cost:15.99, cycle:'monthly', cat:'personal', status:'active', renewal:d(18), icon:'🎬', notes:'' },
-    { id:6, name:'Spotify', cost:10.99, cycle:'monthly', cat:'personal', status:'paused', renewal:d(30), icon:'🎵', notes:'' },
-    { id:7, name:'Adobe CC', cost:599, cycle:'annual', cat:'work', status:'active', renewal:d(45), icon:'🖥', notes:'Creative Cloud all apps' },
-    { id:8, name:'Notion', cost:8, cycle:'monthly', cat:'work', status:'cancelled', renewal:d(-5), icon:'📝', notes:'' },
-  ];
-}
-
-// ─── Helpers ───
-function toMonthly(cost, cycle) {
-  if (cycle === 'annual') return cost / 12;
-  if (cycle === 'weekly') return cost * 4.33;
-  return cost;
-}
-function convert(n) { return currency === 'USD' ? n * CAD_USD : n; }
-function sym() { return currency; }
-function fmt(n) {
-  const v = convert(n);
-  return v.toLocaleString('en-CA', { style:'currency', currency:currency, maximumFractionDigits:2 });
-}
-function daysUntil(ds) {
-  if (!ds) return null;
-  const now = new Date(); now.setHours(0,0,0,0);
-  const d = new Date(ds+'T00:00:00'); d.setHours(0,0,0,0);
-  return Math.round((d-now)/86400000);
-}
-
-// ─── Currency ───
-function setCurrency(c) {
-  currency = c;
-  document.querySelectorAll('.currency-btn').forEach(b => b.classList.toggle('active', b.textContent===c));
-  render();
-}
-
-// ─── Tabs ───
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['overview','trend'][i]===tab));
-  document.getElementById('tab-overview').classList.toggle('active', tab==='overview');
-  document.getElementById('tab-trend').classList.toggle('active', tab==='trend');
-  if (tab==='trend') renderTrend();
-}
-
-// ─── Render ───
-function render() {
-  renderMetrics();
-  renderCharts();
-  renderList();
-}
-
-function renderMetrics() {
-  const active = subs.filter(s => s.status==='active');
-  const monthly = active.reduce((a,s) => a+toMonthly(s.cost,s.cycle),0);
-  const annual = monthly*12;
-  const work = active.filter(s=>s.cat==='work').reduce((a,s)=>a+toMonthly(s.cost,s.cycle),0);
-  const personal = active.filter(s=>s.cat==='personal').reduce((a,s)=>a+toMonthly(s.cost,s.cycle),0);
-  const soon = active.filter(s=>{const d=daysUntil(s.renewal);return d!==null&&d<=14&&d>=0;}).length;
-  const total = subs.length;
-
-  document.getElementById('metrics').innerHTML = `
-    <div class="metric"><div class="metric-label">Monthly spend</div><div class="metric-value">${fmt(monthly)}</div><div class="metric-sub">active only</div></div>
-    <div class="metric"><div class="metric-label">Annual spend</div><div class="metric-value">${fmt(annual)}</div><div class="metric-sub">projected</div></div>
-    <div class="metric"><div class="metric-label">Work</div><div class="metric-value">${fmt(work)}</div><div class="metric-sub">/mo · ${active.filter(s=>s.cat==='work').length} active</div></div>
-    <div class="metric"><div class="metric-label">Personal</div><div class="metric-value">${fmt(personal)}</div><div class="metric-sub">/mo · ${active.filter(s=>s.cat==='personal').length} active</div></div>
-    <div class="metric ${soon>0?'metric-warn':''}"><div class="metric-label">Renewing soon</div><div class="metric-value">${soon}</div><div class="metric-sub">within 14 days</div></div>
-    <div class="metric"><div class="metric-label">Total tracked</div><div class="metric-value">${total}</div><div class="metric-sub">${subs.filter(s=>s.status==='cancelled').length} cancelled</div></div>
-  `;
-}
-
-function renderCharts() {
-  const active = subs.filter(s=>s.status==='active');
-
-  // By category
-  const byCat = {};
-  active.forEach(s => { byCat[s.cat] = (byCat[s.cat]||0)+toMonthly(s.cost,s.cycle); });
-  const maxCat = Math.max(...Object.values(byCat),0.01);
-  const CAT_COLORS = { work:'#1a7fcb', personal:'#18a05a' };
-  const catBars = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([cat,val]) => `
-    <div class="bar-row">
-      <div class="bar-label">${cat.charAt(0).toUpperCase()+cat.slice(1)}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(val/maxCat*100).toFixed(1)}%;background:${CAT_COLORS[cat]||'#888'}"></div></div>
-      <div class="bar-val">${fmt(val)}</div>
-    </div>`).join('');
-
-  // Top spenders
-  const topSpend = [...active].sort((a,b)=>toMonthly(b.cost,b.cycle)-toMonthly(a.cost,a.cycle)).slice(0,5);
-  const maxSpend = toMonthly(topSpend[0]?.cost||1, topSpend[0]?.cycle||'monthly');
-  const spendBars = topSpend.map(s => {
-    const mo = toMonthly(s.cost,s.cycle);
-    return `<div class="bar-row">
-      <div class="bar-label">${s.icon||'📦'} ${s.name}</div>
-      <div class="bar-track"><div class="bar-fill" style="width:${(mo/maxSpend*100).toFixed(1)}%;background:#7b5af5"></div></div>
-      <div class="bar-val">${fmt(mo)}</div>
-    </div>`;
-  }).join('');
-
-  // Upcoming renewals
-  const upcoming = active.filter(s=>s.renewal).map(s=>({...s,days:daysUntil(s.renewal)}))
-    .filter(s=>s.days!==null&&s.days>=0).sort((a,b)=>a.days-b.days).slice(0,5);
-  const renewalRows = upcoming.length ? upcoming.map(s => `
-    <div class="renewal-row">
-      <div class="renewal-name">${s.icon||'📦'} ${s.name}</div>
-      <span class="renewal-days ${s.days<=14?'days-urgent':'days-ok'}">${s.days===0?'Today':s.days===1?'Tomorrow':s.days+'d'}</span>
-    </div>`).join('') : '<div style="font-size:0.78rem;color:var(--text3);padding:8px 0">No upcoming renewals</div>';
-
-  document.getElementById('charts').innerHTML = `
-    <div>
-      <div class="chart-card" style="margin-bottom:12px">
-        <div class="chart-card-title">Spend by category</div>${catBars||'<div style="font-size:0.78rem;color:var(--text3)">No data</div>'}
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-title">Top spenders (monthly)</div>${spendBars||'<div style="font-size:0.78rem;color:var(--text3)">No data</div>'}
-      </div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-card-title">Upcoming renewals</div>
-      ${renewalRows}
-    </div>
-  `;
-}
-
-function renderTrend() {
-  const active = subs.filter(s=>s.status==='active');
-  const monthlyTotal = active.reduce((a,s)=>a+toMonthly(s.cost,s.cycle),0);
-  const converted = convert(monthlyTotal);
-
-  const labels = [];
-  const data = [];
-  const now = new Date();
-  for (let i=0;i<12;i++) {
-    const d = new Date(now.getFullYear(), now.getMonth()+i, 1);
-    labels.push(d.toLocaleString('en-CA',{month:'short',year:'2-digit'}));
-    data.push(parseFloat(converted.toFixed(2)));
-  }
-
-  const ctx = document.getElementById('trendChart').getContext('2d');
-  if (trendChart) trendChart.destroy();
-  const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-  trendChart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: `Monthly (${currency})`,
-        data,
-        borderColor: '#00e5ff',
-        backgroundColor: 'rgba(0,229,255,0.07)',
-        borderWidth: 2,
-        pointBackgroundColor: '#00e5ff',
-        pointRadius: 4,
-        tension: 0.3,
-        fill: true,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display:false } },
-      scales: {
-        x: { grid: { color: isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)' }, ticks: { color: isDark?'#6e6c66':'#9e9d97', font: { size:11 } } },
-        y: { grid: { color: isDark?'rgba(255,255,255,0.05)':'rgba(0,0,0,0.04)' }, ticks: { color: isDark?'#6e6c66':'#9e9d97', font: { size:11 }, callback: v => currency+' '+v.toFixed(0) } }
-      }
-    }
-  });
-}
-
-function renderList() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const catF = document.getElementById('filterCat').value;
-  const statusF = document.getElementById('filterStatus').value;
-  const sortBy = document.getElementById('sortBy').value;
-
-  let filtered = subs.filter(s => {
-    if (q && !s.name.toLowerCase().includes(q) && !(s.notes||'').toLowerCase().includes(q)) return false;
-    if (catF && s.cat!==catF) return false;
-    if (statusF && s.status!==statusF) return false;
-    return true;
-  });
-
-  filtered.sort((a,b) => {
-    if (sortBy==='cost-desc') return toMonthly(b.cost,b.cycle)-toMonthly(a.cost,a.cycle);
-    if (sortBy==='cost-asc') return toMonthly(a.cost,a.cycle)-toMonthly(b.cost,b.cycle);
-    if (sortBy==='renewal') return (a.renewal||'9999')>(b.renewal||'9999')?1:-1;
-    return a.name.localeCompare(b.name);
-  });
-
-  if (!filtered.length) {
-    document.getElementById('list').innerHTML = '<div class="empty">No subscriptions found.</div>';
-    return;
-  }
-
-  const groups = {};
-  filtered.forEach(s => { (groups[s.cat]=groups[s.cat]||[]).push(s); });
-
-  let html = '';
-  for (const [cat, items] of Object.entries(groups)) {
-    const total = items.filter(s=>s.status==='active').reduce((a,s)=>a+toMonthly(s.cost,s.cycle),0);
-    html += `<div class="section-label">${cat} · ${fmt(total)}/mo</div><div class="sub-list">`;
-    items.forEach(s => {
-      const days = daysUntil(s.renewal);
-      const soonBadge = (s.status==='active'&&days!==null&&days<=14&&days>=0)
-        ? `<span class="badge-soon">${days===0?'Today':days===1?'Tomorrow':days+'d'}</span>` : '';
-      const renewal = s.renewal ? `<span class="badge-date">${new Date(s.renewal+'T00:00:00').toLocaleDateString('en-CA',{month:'short',day:'numeric',year:'numeric'})}</span>` : '';
-      const notes = s.notes ? `<span class="badge-date" style="font-style:italic">${s.notes}</span>` : '';
-      const mo = toMonthly(s.cost, s.cycle);
-      const costLabel = s.cycle==='annual' ? `${fmt(s.cost)}<div class="sub-cost-cycle">/yr · ${fmt(mo)}/mo</div>` : `${fmt(s.cost)}<div class="sub-cost-cycle">/${s.cycle}</div>`;
-
-      html += `<div class="sub-card status-${s.status}">
-        <div class="sub-icon" style="background:${s.cat==='work'?'var(--work-bg)':'var(--personal-bg)'}">${s.icon||'📦'}</div>
+      <div class="form-row-2">
         <div>
-          <div class="sub-name">${s.name}</div>
-          <div class="sub-meta">
-            <span class="badge badge-${s.cat}">${s.cat}</span>
-            <span class="badge badge-${s.status}">${s.status}</span>
-            ${renewal}${soonBadge}${notes}
-          </div>
+          <label class="form-label" for="f-cost">Cost</label>
+          <input class="form-input" id="f-cost" type="number" min="0" step="0.01" placeholder="12.99" />
         </div>
-        <div class="sub-cost"><div class="sub-cost-main">${costLabel}</div></div>
-        <div class="sub-actions">
-          <button class="icon-btn" title="Edit" onclick="openModal(${s.id})">✏</button>
-          <button class="icon-btn" title="${s.status==='paused'?'Resume':'Pause'}" onclick="togglePause(${s.id})">${s.status==='paused'?'▶':'⏸'}</button>
-          <button class="icon-btn danger" title="Delete" onclick="deleteSub(${s.id})">✕</button>
+        <div>
+          <label class="form-label" for="f-cycle">Billing cycle</label>
+          <select class="form-input" id="f-cycle">
+            <option value="monthly">Monthly</option>
+            <option value="annual">Annual</option>
+            <option value="weekly">Weekly</option>
+          </select>
         </div>
-      </div>`;
-    });
-    html += '</div>';
-  }
-  document.getElementById('list').innerHTML = html;
-}
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label class="form-label" for="f-cat">Category</label>
+          <select class="form-input" id="f-cat">
+            <option value="work">Work</option>
+            <option value="personal">Personal</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label" for="f-status">Status</label>
+          <select class="form-input" id="f-status">
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="f-renewal">Renewal date</label>
+        <input class="form-input" id="f-renewal" type="date" />
+      </div>
+      <div class="form-row-2">
+        <div>
+          <label class="form-label" for="f-icon">Icon / emoji</label>
+          <input class="form-input" id="f-icon" placeholder="🎨" maxlength="4" />
+        </div>
+        <div>
+          <label class="form-label" for="f-notes">Notes</label>
+          <input class="form-input" id="f-notes" placeholder="e.g. Team plan, 5 seats" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-action="modal-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" data-action="modal-save">Save</button>
+      </div>
+    </div>
+  </div>
 
-// ─── Modal ───
-function openModal(id=null) {
-  editId = id;
-  const s = id ? subs.find(x=>x.id===id) : null;
-  document.getElementById('modal-title').textContent = s ? 'Edit subscription' : 'Add subscription';
-  document.getElementById('f-name').value = s?.name||'';
-  document.getElementById('f-cost').value = s?.cost||'';
-  document.getElementById('f-cycle').value = s?.cycle||'monthly';
-  document.getElementById('f-cat').value = s?.cat||'work';
-  document.getElementById('f-status').value = s?.status||'active';
-  document.getElementById('f-renewal').value = s?.renewal||'';
-  document.getElementById('f-icon').value = s?.icon||'';
-  document.getElementById('f-notes').value = s?.notes||'';
-  document.getElementById('modal').style.display = 'flex';
-  setTimeout(()=>document.getElementById('f-name').focus(),50);
-}
-function closeModal() { document.getElementById('modal').style.display='none'; editId=null; }
-function saveModal() {
-  const name = document.getElementById('f-name').value.trim();
-  const cost = parseFloat(document.getElementById('f-cost').value);
-  if (!name || isNaN(cost)||cost<0) { alert('Please enter a valid name and cost.'); return; }
-  const sub = {
-    id: editId||Date.now(), name, cost,
-    cycle: document.getElementById('f-cycle').value,
-    cat: document.getElementById('f-cat').value,
-    status: document.getElementById('f-status').value,
-    renewal: document.getElementById('f-renewal').value||null,
-    icon: document.getElementById('f-icon').value.trim()||ICONS[Math.floor(Math.random()*ICONS.length)],
-    notes: document.getElementById('f-notes').value.trim()||'',
-  };
-  if (editId) { const i=subs.findIndex(x=>x.id===editId); subs[i]=sub; }
-  else subs.push(sub);
-  saveData(); closeModal(); render();
-}
-
-// ─── Actions ───
-function togglePause(id) {
-  const s = subs.find(x=>x.id===id);
-  if (!s||s.status==='cancelled') return;
-  s.status = s.status==='paused'?'active':'paused';
-  saveData(); render();
-}
-function deleteSub(id) {
-  if (!confirm('Remove this subscription?')) return;
-  subs = subs.filter(x=>x.id!==id);
-  saveData(); render();
-}
-
-// ─── CSV Export ───
-function exportCSV() {
-  const rows = [['Name','Category','Status','Cost','Cycle','Monthly (CAD)','Renewal','Notes']];
-  subs.forEach(s => {
-    rows.push([s.name, s.cat, s.status, s.cost, s.cycle, toMonthly(s.cost,s.cycle).toFixed(2), s.renewal||'', s.notes||'']);
-  });
-  const csv = rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='subscriptions.csv'; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ─── Reminders ───
-function showReminders() {
-  const active = subs.filter(s=>s.status==='active'&&s.renewal);
-  const sorted = active.map(s=>({...s,days:daysUntil(s.renewal)})).filter(s=>s.days!==null&&s.days>=0).sort((a,b)=>a.days-b.days);
-
-  if (!sorted.length) {
-    document.getElementById('reminder-list').innerHTML='<div style="font-size:0.8rem;color:var(--text3)">No active subscriptions with renewal dates.</div>';
-  } else {
-    document.getElementById('reminder-list').innerHTML = sorted.map(s => {
-      const dateStr = new Date(s.renewal+'T00:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'long',day:'numeric',year:'numeric'});
-      const cost = fmt(toMonthly(s.cost,s.cycle));
-      return `<div class="reminder-item" onclick="copyText(this)" title="Click to copy">📅 ${s.name} renews on ${dateStr} — ${cost}/${s.cycle==='annual'?'yr':'mo'} (${s.days===0?'today':s.days===1?'tomorrow':s.days+' days'})</div>`;
-    }).join('');
-  }
-  document.getElementById('reminder-modal').style.display='flex';
-}
-function copyText(el) {
-  navigator.clipboard.writeText(el.textContent.trim()).then(()=>{
-    const orig=el.style.background; el.style.background='var(--accent-dim)';
-    setTimeout(()=>el.style.background=orig, 600);
-  });
-}
-function copyAllReminders() {
-  const texts = [...document.querySelectorAll('.reminder-item')].map(el=>el.textContent.trim()).join('\n');
-  navigator.clipboard.writeText(texts).then(()=>alert('Copied all reminders to clipboard!'));
-}
-
-// ─── Keyboard shortcuts ───
-document.addEventListener('keydown', e => {
-  if (e.key==='Escape') { closeModal(); document.getElementById('reminder-modal').style.display='none'; }
-  if ((e.metaKey||e.ctrlKey)&&e.key==='k') { e.preventDefault(); openModal(); }
-});
-document.getElementById('modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
-document.getElementById('reminder-modal').addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
-
-// ─── Init ───
-loadData();
-render();
-</script>
-  <script type="module" src="/src/main.ts"></script>
+  <div class="modal-backdrop" id="reminder-modal" style="display:none" role="presentation">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-title">Renewal reminders</div>
+      <p style="font-size:0.78rem;color:var(--text3);margin-bottom:1rem;">Copy any reminder text to paste into your calendar or Notion database.</p>
+      <div class="reminder-list" id="reminder-list"></div>
+      <button type="button" class="btn btn-primary copy-all-btn" data-action="reminder-copy-all">Copy all reminders</button>
+      <div class="modal-footer" style="padding-top:0.75rem;margin-top:0.5rem;">
+        <button type="button" class="btn" data-action="reminder-close">Close</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
