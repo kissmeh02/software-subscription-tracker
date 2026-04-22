@@ -4,23 +4,16 @@
 
 This folder is a Git repository. To publish it to GitHub:
 
-1. **Create an empty repository on GitHub** (no README/license if you already have one here):  
-   [github.com/new](https://github.com/new)
+**Repository:** [github.com/kissmeh02/software-subscription-tracker](https://github.com/kissmeh02/software-subscription-tracker)
 
-2. **Add the remote and push** (replace `YOUR_USER` and `REPO_NAME`):
+To push later updates:
 
-   ```bash
-   cd "d:\Repository\Software Subscription Tracker"
-   git remote add origin https://github.com/YOUR_USER/REPO_NAME.git
-   git branch -M main
-   git push -u origin main
-   ```
-
-   If you use **GitHub CLI** and are logged in:
-
-   ```bash
-   gh repo create REPO_NAME --source=. --public --push
-   ```
+```bash
+cd "d:\Repository\Software Subscription Tracker"
+git add -A
+git commit -m "Your message"
+git push
+```
 
 ## Using this project in Notion
 
